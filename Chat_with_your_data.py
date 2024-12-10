@@ -190,7 +190,7 @@ with columns[0]:
     with st.container(border=True):
         if url:
             st.markdown(
-                f'<iframe width="1200" height="800" src="{url}" frameborder="0" allowFullScreen="true"></iframe>',
+                f'<iframe width="1000" height="800" src="{url}" frameborder="0" allowFullScreen="true"></iframe>',
                 unsafe_allow_html=True
             )
         else:
