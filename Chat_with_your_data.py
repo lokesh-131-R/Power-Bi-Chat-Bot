@@ -18,7 +18,7 @@ SNOWFLAKE_WAREHOUSE = "POWERHOUSE"
 # Establish connection to Snowflake
 conn = snowflake.connector.connect(
     user=SNOWFLAKE_USER,
-    password=SNOWFLAKE_PASSWORD, 
+    password=SNOWFLAKE_PASSWORD,
     account=SNOWFLAKE_ACCOUNT,
     warehouse=SNOWFLAKE_WAREHOUSE,
 )
@@ -93,58 +93,44 @@ st.header("Power BI Smart Bot")
 
 columns = st.columns([8, 2])
 
-# Initialize session state for files if not already set
-if "files" not in st.session_state:
-    st.session_state['files'] = []
-if "excel_dataframes" not in st.session_state:
-    st.session_state['excel_dataframes'] = []
+# Load Excel and JSON data directly from predefined local paths
+json_path = r"C:\Users\LokeshRamesh\Documents\co_10 training\LLM\LLMS - Store LLMs\Workspaces\DataModelSchema.json"
+excel_path = r"C:\Users\LokeshRamesh\Documents\co_10 training\LLM\LLMS - Store LLMs\Workspaces\Data DictionaryChat bot.xlsx"
 
-# File upload and Power BI URL input
-with st.expander('Upload files'):
-    files = st.file_uploader("Place your JSON or Excel files", type=["json", "xlsx"], accept_multiple_files=True)
-    if files:
-        st.session_state['files'] = files
-    url = st.text_input("Place your Power BI URL")
+json_data = pd.read_json(json_path, encoding='utf-16')
+df = pd.DataFrame()
 
-# Stop execution if no file is uploaded
-if not st.session_state['files']:
-    st.stop()
+# Process JSON data
+table_1 = list(json_data["model"]['tables'])
+for i in range(len(table_1)):
+    table = table_1[i]
+    if 'measures' in table:
+        df = pd.concat([df, pd.DataFrame(table['measures'])], ignore_index=True)
+Measure_Table = df[["name", "expression"]]
+Measure_Table = Measure_Table.rename(columns={"expression": "DAX", "name": "Dax Name"})
 
-# Process uploaded files into separate dataframes
-json_dataframes = []
-excel_dataframes = []
+df_1 = pd.DataFrame(columns=['Table Name', 'Column Name'])
+tables = json_data["model"]['tables']
+for table in tables:
+    if 'columns' in table:
+        for column in table['columns']:
+            df_1 = pd.concat([df_1, pd.DataFrame({'Table Name': [table['name']], 'Column Name': [column['name']], 'Data Type': [column['dataType']]})], ignore_index=True)
 
-for file in st.session_state['files']:
-    if file.name.endswith(".json"):
-        json_data = pd.read_json(file, encoding='utf-16')
-        df = pd.DataFrame()
-        
-        table_1 = list(json_data["model"]['tables'])
-        for i in range(len(table_1)):
-            table = table_1[i]
-            if 'measures' in table:
-                df = pd.concat([df, pd.DataFrame(table['measures'])], ignore_index=True)
-        Measure_Table = df[["name", "expression"]]
-        Measure_Table = Measure_Table.rename(columns={"expression": "DAX", "name": "Dax Name"})
-        json_dataframes.append(Measure_Table)
-        
-        df_1 = pd.DataFrame(columns=['Table Name', 'Column Name'])
-        tables = json_data["model"]['tables']
-        for table in tables:
-            if 'columns' in table:
-                for column in table['columns']:
-                    df_1 = pd.concat([df_1, pd.DataFrame({'Table Name': [table['name']], 'Column Name': [column['name']], 'Data Type': [column['dataType']]})], ignore_index=True)
-    elif file.name.endswith(".xlsx"):
-        xls_data = pd.read_excel(file)
-if "OPENAI_API_KEY" not in st.session_state :
-    os.environ["OPENAI_API_KEY"] = st.text_input("Upload your API Key")
-    openai.api_key = os.environ["OPENAI_API_KEY"]
+# Process Excel data
+xls_data = pd.read_excel(excel_path)
+
+# Set up OpenAI API key
+if "OPENAI_API_KEY" not in st.session_state:
+    api_key = st.text_input("Upload your API Key", type="password")
+    if api_key:
+        os.environ["OPENAI_API_KEY"] = api_key
+        openai.api_key = os.environ["OPENAI_API_KEY"]
 
 llm = ChatOpenAI(model="gpt-4", temperature=0.1, max_tokens=5000)
 
 # Create agents for each dataframe
 agents = {
-    "Power Bi Calculation": create_pandas_dataframe_agent(df=json_dataframes[0], llm=llm, allow_dangerous_code=True, handle_parsing_errors=True),
+    "Power Bi Calculation": create_pandas_dataframe_agent(df=Measure_Table, llm=llm, allow_dangerous_code=True, handle_parsing_errors=True),
     "Power Bi Table": create_pandas_dataframe_agent(df=df_1, llm=llm, allow_dangerous_code=True, handle_parsing_errors=True),
     "Data": create_pandas_dataframe_agent(df=df_Snowflack, llm=llm, allow_dangerous_code=True, handle_parsing_errors=True),
     "Dictionary": create_pandas_dataframe_agent(df=xls_data, llm=llm, allow_dangerous_code=True, handle_parsing_errors=True)
@@ -156,7 +142,7 @@ if "messages" not in st.session_state:
 
 with columns[1]:
     with st.container(border=True):
-        response_container = st.container(height=430)
+        response_container = st.container(height=450)
         selected_df = st.selectbox("Select Topic to chat with", list(agents.keys()))
         if prompt := st.chat_input("Ask your question here"):
             st.session_state.messages.append({"role": "user", "content": prompt})
@@ -188,10 +174,8 @@ with columns[1]:
 
 with columns[0]:
     with st.container(border=True):
-        if url:
+        if url := st.text_input("Place your Power BI URL"):
             st.markdown(
-                f'<iframe width="850-" height="600" src="{url}" frameborder="0" allowFullScreen="true"></iframe>',
+                f'<iframe width="850" height="600" src="{url}" frameborder="0" allowFullScreen="true"></iframe>',
                 unsafe_allow_html=True
             )
-        else:
-            st.write("Please enter a Power BI embed URL.")
