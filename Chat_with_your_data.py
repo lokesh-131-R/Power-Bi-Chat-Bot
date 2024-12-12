@@ -178,7 +178,7 @@ with columns[0]:
             url = st.text_input("Place your Power BI URL")
         if url:
             st.markdown(
-                f'<iframe width="850" height="600" src="{url}" frameborder="0" allowFullScreen="true"></iframe>',
+                f'<iframe width="750" height="500" src="{url}" frameborder="0" allowFullScreen="true"></iframe>',
                 unsafe_allow_html=True
             )
                 
