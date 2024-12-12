@@ -142,7 +142,7 @@ if "messages" not in st.session_state:
 
 with columns[1]:
     with st.container(border=True):
-        response_container = st.container(height=380)
+        response_container = st.container(height=360)
         selected_df = st.selectbox("Select Topic to chat with", list(agents.keys()))
         if prompt := st.chat_input("Ask your question here"):
             st.session_state.messages.append({"role": "user", "content": prompt})
