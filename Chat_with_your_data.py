@@ -167,7 +167,7 @@ with columns[1]:
             with response_container:
                 for message in st.session_state.messages:
                     with st.chat_message(message["role"]):
-                        st.markdown(message["content"])
+                        st.markdown(f'<div style="font-size: small;">{message["content"]}</div>', unsafe_allow_html=True)
 
         if st.button('Clear Chat'):
             st.session_state.messages = []
