@@ -142,7 +142,7 @@ if "messages" not in st.session_state:
 
 with columns[1]:
     with st.container(border=True):
-        response_container = st.container(height=400)
+        response_container = st.container(height=350)
         selected_df = st.selectbox("Select Topic to chat with", list(agents.keys()))
         if prompt := st.chat_input("Ask your question here"):
             st.session_state.messages.append({"role": "user", "content": prompt})
@@ -176,6 +176,6 @@ with columns[0]:
     with st.container(border=True):
         if url := st.text_input("Place your Power BI URL"):
             st.markdown(
-                f'<iframe width="750" height="600" src="{url}" frameborder="0" allowFullScreen="true"></iframe>',
+                f'<iframe width="750" height="500" src="{url}" frameborder="0" allowFullScreen="true"></iframe>',
                 unsafe_allow_html=True
             )
