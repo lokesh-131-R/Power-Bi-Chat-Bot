@@ -174,8 +174,10 @@ with columns[1]:
 
 with columns[0]:
     with st.container(border=True):
-        if url := st.text_input("Place your Power BI URL"):
-            st.markdown(
-                f'<iframe width="750" height="500" src="{url}" frameborder="0" allowFullScreen="true"></iframe>',
-                unsafe_allow_html=True
-            )
+        with st.expander("Enter Power BI URL"):
+            url = st.text_input("Place your Power BI URL")
+            if url:
+                st.markdown(
+                    f'<iframe width="750" height="500" src="{url}" frameborder="0" allowFullScreen="true"></iframe>',
+                    unsafe_allow_html=True
+                )
