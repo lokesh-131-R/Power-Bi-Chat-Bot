@@ -91,7 +91,7 @@ st.button("refresh")
 # Header for the chat interface
 st.header("Power BI Smart Bot")
 
-columns = st.columns([7,3])
+columns = st.columns([7.5,2.5])
 
 # Load Excel and JSON data directly from predefined local paths
 json_path = r"DataModelSchema.json"
