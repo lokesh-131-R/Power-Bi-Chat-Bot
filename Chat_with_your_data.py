@@ -143,12 +143,7 @@ if "messages" not in st.session_state:
 with columns[1]:
     with st.container(border=True):
         response_container = st.container(height=450)
-        selected_df = st.selectbox(
-            "Select Topic to chat with",
-            list(agents.keys()),
-            format_func=lambda x: f'<div style="font-size: small;">{x}</div>',
-            unsafe_allow_html=True
-        )
+        selected_df = st.selectbox("Select Topic to chat with", list(agents.keys()))
         if prompt := st.chat_input("Ask your question here"):
             st.session_state.messages.append({"role": "user", "content": prompt})
             conversation_history = "\n".join([msg["content"] for msg in st.session_state.messages])
