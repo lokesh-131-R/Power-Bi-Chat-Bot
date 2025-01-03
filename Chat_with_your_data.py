@@ -1,5 +1,4 @@
 import json
-import toml
 import pandas as pd
 import streamlit as st
 import snowflake.connector
@@ -8,19 +7,13 @@ import openai
 from langchain_openai import ChatOpenAI
 from langchain_experimental.agents import create_pandas_dataframe_agent
 
-# Load Snowflake connection details from config.toml
-config = toml.load("config.toml")
-snowflake_config = config["snowflake"]
-openai_config = config["openai"]
-openai.api_key = openai_config["api_key"]
-
 # Snowflake connection details
-SNOWFLAKE_USER = snowflake_config["user"]
-SNOWFLAKE_PASSWORD = snowflake_config["password"]
-SNOWFLAKE_ACCOUNT = snowflake_config["account"]
-SNOWFLAKE_DATABASE = snowflake_config["database"]
-SNOWFLAKE_SCHEMA = snowflake_config["schema"]
-SNOWFLAKE_WAREHOUSE = snowflake_config["warehouse"]
+SNOWFLAKE_USER = "dsx_dashboards_powerbi_service_account"
+SNOWFLAKE_PASSWORD = "B!_PowerBI2024"
+SNOWFLAKE_ACCOUNT = "c2gpartners.us-east-1"
+SNOWFLAKE_DATABASE = "DSX_DASHBOARDS"
+SNOWFLAKE_SCHEMA = "HUBSPOT_REPORTING"
+SNOWFLAKE_WAREHOUSE = "POWERHOUSE"
 
 # Establish connection to Snowflake
 conn = snowflake.connector.connect(
@@ -29,22 +22,6 @@ conn = snowflake.connector.connect(
     account=SNOWFLAKE_ACCOUNT,
     warehouse=SNOWFLAKE_WAREHOUSE,
 )
-
-# Snowflake connection details
-# SNOWFLAKE_USER = "dsx_dashboards_powerbi_service_account"
-# SNOWFLAKE_PASSWORD = "B!_PowerBI2024"
-# SNOWFLAKE_ACCOUNT = "c2gpartners.us-east-1"
-# SNOWFLAKE_DATABASE = "DSX_DASHBOARDS"
-# SNOWFLAKE_SCHEMA = "HUBSPOT_REPORTING"
-# SNOWFLAKE_WAREHOUSE = "POWERHOUSE"
-
-# Establish connection to Snowflake
-# conn = snowflake.connector.connect(
-#     user=SNOWFLAKE_USER,
-#     password=SNOWFLAKE_PASSWORD,
-#     account=SNOWFLAKE_ACCOUNT,
-#     warehouse=SNOWFLAKE_WAREHOUSE,
-# )
 
 # SQL query to execute
 query = """
@@ -114,11 +91,11 @@ st.button("refresh")
 # Header for the chat interface
 st.header("Power BI Smart Bot")
 
-columns = st.columns([7.5,2.5])
+columns = st.columns([8, 2])
 
 # Load Excel and JSON data directly from predefined local paths
-json_path = r"data\DataModelSchema.json"
-excel_path = r"data\Dictionary.xlsx"
+json_path = r"C:\Users\LokeshRamesh\Documents\co_10 training\LLM\LLMS - Store LLMs\Workspaces\DataModelSchema.json"
+excel_path = r"C:\Users\LokeshRamesh\Documents\co_10 training\LLM\LLMS - Store LLMs\Workspaces\Data DictionaryChat bot.xlsx"
 
 json_data = pd.read_json(json_path, encoding='utf-16')
 df = pd.DataFrame()
@@ -143,16 +120,13 @@ for table in tables:
 xls_data = pd.read_excel(excel_path)
 
 # Set up OpenAI API key
-# if "OPENAI_API_KEY" not in st.session_state:
-#     api_key = st.text_input("Upload your API Key", type="password")
-#      if api_key:
-#         os.environ["OPENAI_API_KEY"] = api_key
-#         openai.api_key = os.environ["OPENAI_API_KEY"]
+if "OPENAI_API_KEY" not in st.session_state:
+    api_key = st.text_input("Upload your API Key", type="password")
+    if api_key:
+        os.environ["OPENAI_API_KEY"] = api_key
+        openai.api_key = os.environ["OPENAI_API_KEY"]
 
-# llm = ChatOpenAI(model="gpt-4", temperature=0.1, max_tokens=5000)
-
-# Set up OpenAI API key (loaded from config)
-llm = ChatOpenAI(model="gpt-4", temperature=0.1, max_tokens=5000, api_key=openai.api_key)
+llm = ChatOpenAI(model="gpt-4", temperature=0.1, max_tokens=5000)
 
 # Create agents for each dataframe
 agents = {
@@ -168,7 +142,7 @@ if "messages" not in st.session_state:
 
 with columns[1]:
     with st.container(border=True):
-        response_container = st.container(height=360)
+        response_container = st.container(height=450)
         selected_df = st.selectbox("Select Topic to chat with", list(agents.keys()))
         if prompt := st.chat_input("Ask your question here"):
             st.session_state.messages.append({"role": "user", "content": prompt})
@@ -195,16 +169,14 @@ with columns[1]:
                     with st.chat_message(message["role"]):
                         st.markdown(f'<div style="font-size: small;">{message["content"]}</div>', unsafe_allow_html=True)
 
+
         if st.button('Clear Chat'):
             st.session_state.messages = []
 
 with columns[0]:
     with st.container(border=True):
-        with st.expander("Enter Power BI URL"):
-            url = st.text_input("Place your Power BI URL")
-        if url:
+        if url := st.text_input("Place your Power BI URL"):
             st.markdown(
-                f'<iframe width="780" height="500" src="{url}" frameborder="0" allowFullScreen="true"></iframe>',
+                f'<iframe width="850" height="600" src="{url}" frameborder="0" allowFullScreen="true"></iframe>',
                 unsafe_allow_html=True
             )
-                
