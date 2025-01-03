@@ -94,8 +94,8 @@ st.header("Power BI Smart Bot")
 columns = st.columns([8, 2])
 
 # Load Excel and JSON data directly from predefined local paths
-json_path = r"C:\Users\LokeshRamesh\Documents\co_10 training\LLM\LLMS - Store LLMs\Workspaces\DataModelSchema.json"
-excel_path = r"C:\Users\LokeshRamesh\Documents\co_10 training\LLM\LLMS - Store LLMs\Workspaces\Data DictionaryChat bot.xlsx"
+json_path = DataModelSchema.json
+excel_path =Data DictionaryChat bot.xlsx
 
 json_data = pd.read_json(json_path, encoding='utf-16')
 df = pd.DataFrame()
